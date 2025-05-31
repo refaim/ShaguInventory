@@ -83,11 +83,10 @@ InventoryCounterFrame:SetScript("OnEvent", function (self)
       InventoryCounter_UpdateBagsAndBank()
     end
   end)
-InventoryCounterFrameToolTip = CreateFrame( "Frame" , "InventoryCounterFrameToolTip", GameTooltip )
-InventoryCounterFrameToolTip:SetScript("OnShow", function (self)
-    if GameTooltip:GetAnchorType() == "ANCHOR_CURSOR" then return end
+
+local function draw(tooltip)
     if InventoryCounterDB then
-      local lbl = getglobal("GameTooltipTextLeft1")
+      local lbl = getglobal(tooltip:GetName() .. "TextLeft1")
       if lbl then
         local itemName = lbl:GetText()
         local totalCount = 0
@@ -97,18 +96,30 @@ InventoryCounterFrameToolTip:SetScript("OnShow", function (self)
             local count = InventoryCounterDB[char][slot][itemName]
             if count then
               if not initLineAdded then
-                GameTooltip:AddLine(" ", 0, 0, 0, 0)
+                tooltip:AddLine(" ", 0, 0, 0, 0)
                 initLineAdded = true
               end
               totalCount = totalCount + count
-              GameTooltip:AddDoubleLine(char .. " |cff556677[" .. slot .. "]", count, 0.65, 0.75, 0.85, 0.65, 0.75, 0.85)
+              tooltip:AddDoubleLine(char .. " |cff556677[" .. slot .. "]", count, 0.65, 0.75, 0.85, 0.65, 0.75, 0.85)
             end
           end
         end
         if (totalCount>0) then
-          GameTooltip:AddDoubleLine("Total:", totalCount, 0, 0.8, 1, 0, 0.8, 1)
+          tooltip:AddDoubleLine("Total:", totalCount, 0, 0.8, 1, 0, 0.8, 1)
         end
       end
     end
-    GameTooltip:Show()
+    tooltip:Show()
+end
+
+InventoryCounterFrameToolTip = CreateFrame("Frame" , "InventoryCounterFrameToolTip", GameTooltip)
+InventoryCounterFrameToolTip:SetScript("OnShow", function (self)
+    if GameTooltip:GetAnchorType() ~= "ANCHOR_CURSOR" then
+      draw(GameTooltip)
+    end
+  end)
+
+InventoryCounterFrameItemRefToolTip = CreateFrame("Frame", "InventoryCounterFrameItemRefToolTip", ItemRefTooltip)
+InventoryCounterFrameItemRefToolTip:SetScript("OnShow", function (self)
+    draw(ItemRefTooltip)
   end)
